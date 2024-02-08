@@ -4,7 +4,7 @@ import SpotifyStats from "./SpotifyStats";
 
 export default function Layout({children, hideContent}) {
     return (
-      <div>
+      <div className="bg-black">
         <Header hide={hideContent}/>
         <div className="flex mt-4 max-w-6xl mx-auto gap-6">
           {!hideContent && (
