@@ -1,5 +1,6 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Avatar from "./Avatar";
 
 export default function Header({ hide }) {
@@ -47,6 +48,7 @@ export default function Header({ hide }) {
         {users.length > 0 && (
           <div className="absolute bg-white border border-gray-200 rounded-lg shadow-md py-1 w-64 top-full mt-1">
             {users.map((user) => (
+              <Link href={"/profile/"+user.id}>
               <div key={user.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex gap-3">
                 <Avatar url={user.avatar} />
                 <div>
@@ -54,6 +56,7 @@ export default function Header({ hide }) {
                   <p className="text-gray-500 text-sm">{user.username}</p>
                 </div>
               </div>
+              </Link>
             ))}
           </div>
         )}
