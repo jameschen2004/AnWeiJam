@@ -46,7 +46,7 @@ export default function Header({ hide }) {
         )}
         {/* Display search results */}
         {users.length > 0 && (
-          <div className="absolute bg-white border border-gray-200 rounded-lg shadow-md py-1 w-64 top-full mt-1">
+          <div className="absolute bg-white border border-gray-200 rounded-lg shadow-md py-1 w-64 top-full mt-1 z-50">
             {users.map((user) => (
               <Link href={"/profile/"+user.id}>
               <div key={user.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex gap-3">

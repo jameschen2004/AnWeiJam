@@ -12,8 +12,13 @@ export default function SpotifyStats() {
   const supabase = useSupabaseClient();
 
   useEffect(() => {
+    
+    async function logout() {
+      await supabase.auth.signOut();
+    }
+
     if (session?.expires_in && session.expires_in < 60) {
-        supabase.auth.refreshSession();
+        logout();
         fetchTopArtists();
         fetchTopSongs();
       }

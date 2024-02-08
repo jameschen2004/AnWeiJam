@@ -11,7 +11,7 @@ export default function Home() {
     const supabase = useSupabaseClient();
     const session = useSession();
     const [posts, setPosts] = useState([]);
-    const [friendList, setFriendList] = useState([]);
+    const [followList, setFollowList] = useState([]);
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
@@ -34,34 +34,33 @@ export default function Home() {
             }
         };
 
-        const fetchFriends = async () => {
+        const fetchFollow = async () => {
             try {
                 if (session?.user?.id) {
                     const { data, error } = await supabase
-                        .from('friends')
+                        .from('followers')
                         .select()
-                        .eq('id', session.user.id)
-                        .eq('is_friend', true);
+                        .eq('user_id', session.user.id);
 
                     if (error) {
-                        console.error('Error fetching friends:', error.message);
+                        console.error('Error fetching following:', error.message);
                     } else if (data.length) {
-                        setFriendList(data);
+                        setFollowList(data);
                     }
                 }
             } catch (error) {
-                console.error('Error fetching friends:', error.message);
+                console.error('Error fetching following:', error.message);
             }
         };
 
         fetchProfile();
-        fetchFriends();
+        fetchFollow();
     }, [session?.user?.id]);
 
     useEffect(() => {
         supabase
           .from("posts")
-          .select('id, song, description, artist, genre, album, popularity, artwork_url, created_at, profiles(id, avatar, username)')
+          .select('id, song, song_id, description, artist, artist_id, genre, album, album_id, popularity, artwork_url, created_at, profiles(id, avatar, username)')
           .eq('parent', 0)
           .order('created_at', {ascending: false})
           .then(result => {
@@ -75,16 +74,39 @@ export default function Home() {
 
     return (
         <Layout>
-          <UserContext.Provider value={{profile}}>
-          <div className="items-center">
-            <FormCard />
-            {posts?.length > 0 && posts.filter(post => {
-                return post.profiles.id === session.user.id || friendList.some(friend => friend.friend_id === post.author);
-            }).map(post => (
-                <PostCard song={post.song} artist={post.artist} genre={post.genre} album={post.album} popularity={post.popularity} artworkUrl={post.artwork_url} key={post.created_at} {...post} />
-            ))}
-          </div>
-          </UserContext.Provider>
+            <UserContext.Provider value={{ profile }}>
+                <div className="items-center">
+                    <FormCard />
+                    {posts?.length > 0 &&
+                        posts
+                            .filter((post) => {
+                                const isCurrentUserPost = post.profiles.id === session.user.id;
+                                let isFollowingPost = false;
+                                for (let i = 0; i < followList.length; i++) {
+                                    if (followList[i].following === post.profiles.id) {
+                                        isFollowingPost = true;
+                                        break;
+                                    }
+                                }
+                                return isCurrentUserPost || isFollowingPost;
+                            })
+                            .map((post) => (
+                                <PostCard
+                                    song={post.song}
+                                    song_id={post.song_id}
+                                    artist={post.artist}
+                                    artist_id={post.artist_id}
+                                    genre={post.genre}
+                                    album={post.album}
+                                    album_id={post.album_id}
+                                    popularity={post.popularity}
+                                    artworkUrl={post.artwork_url}
+                                    key={post.created_at}
+                                    {...post}
+                                />
+                            ))}
+                </div>
+            </UserContext.Provider>
         </Layout>
     );
 }

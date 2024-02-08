@@ -7,7 +7,8 @@ import PostCard from "./PostCard";
 export default function ProfileContent({activeTab, userId}) {
     const [posts, setPosts] = useState([]);
     const [profile, setProfile] = useState(null);
-    const [friendList, setFriendList] = useState([]);
+    const [followingList, setFollowingList] = useState([]);
+    const [followerList, setFollowerList] = useState([]);
     const [about, setAbout] = useState('');
     const [editMode, setEditMode] = useState(false);
     const session = useSession();
@@ -18,7 +19,8 @@ export default function ProfileContent({activeTab, userId}) {
             return;
         }
         fetchUser();
-        fetchFriends();
+        fetchFollowing();
+        fetchFollowers();
         if (activeTab === 'posts') {
             loadPosts().then(() => {})
         }
@@ -39,17 +41,30 @@ export default function ProfileContent({activeTab, userId}) {
       });
     }
 
-    function fetchFriends() {
-      supabase.from("friends")
-        .select('profiles!friends_following_fkey(id, avatar, name, username)')
-        .eq('id', userId)
-        .eq('is_friend', true)
+    function fetchFollowing() {
+      supabase.from("followers")
+        .select('id, profiles!followers_following_fkey(id, avatar, name, username)')
+        .eq('user_id', userId)
         .then(result => {
           if (result.error) {
             throw result.error;
           }
           if (result.data) {
-            setFriendList(result.data);
+            setFollowingList(result.data);
+          }
+      });
+    }
+
+    function fetchFollowers() {
+      supabase.from("followers")
+        .select('id, profiles!followers_user_id_fkey(id, avatar, name, username)')
+        .eq('following', userId)
+        .then(result => {
+          if (result.error) {
+            throw result.error;
+          }
+          if (result.data) {
+            setFollowerList(result.data);
           }
       });
     }
@@ -64,7 +79,7 @@ export default function ProfileContent({activeTab, userId}) {
     async function userPosts(userId) {
         const {data} = await supabase
           .from('posts')
-          .select('id, song, description, artist, genre, album, popularity, created_at, artwork_url, profiles(id, avatar, username)')
+          .select('id, song, song_id, description, artist, artist_id, genre, album, album_id, popularity, created_at, artwork_url, profiles(id, avatar, username)')
           .eq('author', userId)
           .eq('parent', 0)
           .order('created_at', {ascending: false})
@@ -101,7 +116,7 @@ export default function ProfileContent({activeTab, userId}) {
         { activeTab === 'posts' && (
           <div>
             {posts?.length > 0 && posts.map(post => (
-                <PostCard {...post} song={post.song} artist={post.artist} genre={post.genre} album={post.album} popularity={post.popularity} artworkUrl={post.artwork_url} key={post.created_at} {...post} />
+                <PostCard {...post} song={post.song} song_id={post.song_id} artist={post.artist} artist_id={post.artist_id} genre={post.genre} album={post.album} album_id={post.album_id} popularity={post.popularity} artworkUrl={post.artwork_url} key={post.created_at} {...post} />
             ))}
           </div>
         )}
@@ -165,16 +180,34 @@ export default function ProfileContent({activeTab, userId}) {
         { activeTab === 'friends' && (
           <div>
             <Card>
-              <h2 className="text-xl mb-2">Friends</h2>
-              {friendList.length > 0 && (
-                friendList.map(friend => (
-                  <a href={`/profile/${friend.profiles.id}`}>
-                    <div key={friend.profiles.id} className="border-b border-b-gray-100 p-4 -mx-4 hover:bg-blue-200 hover:rounded-xl">
+              <h2 className="text-xl mb-2">{"Following - "+followingList.length}</h2>
+              {followingList.length > 0 && (
+                followingList.map(following => (
+                  <a href={`/profile/${following.profiles.id}`} key={`${following.id}-${following.profiles.id}`}>
+                    <div className="border-b border-b-gray-100 p-4 -mx-4 hover:bg-blue-200 hover:rounded-xl">
                       <div className="flex gap-3">
-                        <Avatar url={friend.profiles.avatar} />
+                        <Avatar url={following.profiles.avatar} />
                         <div>
-                          <h3 className="font-semibold text-md">{friend.profiles.name}</h3>
-                          <div className="text-xs leading-3">{friend.profiles.username}</div>
+                          <h3 className="font-semibold text-md">{following.profiles.name}</h3>
+                          <div className="text-xs leading-3">{following.profiles.username}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))
+              )}
+            </Card>
+            <Card>
+              <h2 className="text-xl mb-2">{"Followers - "+followerList.length}</h2>
+              {followerList.length > 0 && (
+                followerList.map(follower => (
+                  <a href={`/profile/${follower.profiles.id}`} key={`${follower.id}-${follower.profiles.id}`}>
+                    <div className="border-b border-b-gray-100 p-4 -mx-4 hover:bg-blue-200 hover:rounded-xl">
+                      <div className="flex gap-3">
+                        <Avatar url={follower.profiles.avatar} />
+                        <div>
+                          <h3 className="font-semibold text-md">{follower.profiles.name}</h3>
+                          <div className="text-xs leading-3">{follower.profiles.username}</div>
                         </div>
                       </div>
                     </div>

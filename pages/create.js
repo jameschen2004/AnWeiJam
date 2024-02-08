@@ -62,9 +62,12 @@ export default function CreatePage() {
                 },
             });
     
+            const song_id = response.data.id;
             const artist = response.data.artists.map(artist => artist.name).join(', ');
+            const artist_id = response.data.artists.map(artist => artist.id).join(', ');
             const genre = response.data.genres; 
             const album = response.data.album.name;
+            const album_id = response.data.album.id;
             const popularity = response.data.popularity;
             const artworkUrl = response.data.album.images[0]?.url;
 
@@ -73,10 +76,13 @@ export default function CreatePage() {
                 .insert({
                     author: session.user.id,
                     song,
+                    song_id,
                     description,
                     artist,
+                    artist_id,
                     genre,
                     album,
+                    album_id,
                     popularity,
                     artwork_url: artworkUrl
                 });
