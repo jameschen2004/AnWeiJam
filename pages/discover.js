@@ -38,7 +38,7 @@ export default function DiscoverPage() {
     useEffect(() => {
         supabase
           .from("posts")
-          .select('id, song, description, artist, genre, album, popularity, created_at, artwork_url, profiles(id, avatar, username)')
+          .select('id, song, song_id, description, artist, artist_id, genre, album, album_id, popularity, created_at, artwork_url, profiles(id, avatar, username)')
           .eq('parent', 0)
           .order('created_at', {ascending: false})
           .then(result => {
@@ -58,7 +58,7 @@ export default function DiscoverPage() {
               Discover Other People's Posts!
             </Card>
             {posts?.length > 0 && posts.map(post => (
-                <PostCard song={post.song} artist={post.artist} genre={post.genre} album={post.album} popularity={post.popularity} artworkUrl={post.artwork_url} key={post.created_at} {...post} />
+                <PostCard song={post.song} song_id={post.song_id} artist={post.artist} artist_id={post.artist_id} genre={post.genre} album={post.album} album_id={post.album_id} popularity={post.popularity} artworkUrl={post.artwork_url} key={post.created_at} {...post} />
             ))}
           </div>
           </UserContext.Provider>

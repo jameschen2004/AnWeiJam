@@ -6,13 +6,15 @@ import ReactTimeAgo from "react-time-ago";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/contexts/UserContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { usePathname } from "next/navigation";
 
-export default function PostCard({id, song, artist, genre, album, popularity, description, created_at, artworkUrl, profiles:authorProfile}) {
+export default function PostCard({id, song, song_id, artist, artist_id, genre, album, album_id, popularity, description, created_at, artworkUrl, profiles:authorProfile}) {
   const {profile:myProfile} = useContext(UserContext);
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const supabase = useSupabaseClient();
+  const pathname = usePathname();
   useEffect(() => {
     fetchLikes();
     fetchComments();
@@ -130,29 +132,36 @@ export default function PostCard({id, song, artist, genre, album, popularity, de
       <div className="my-3">
         <p>{description}</p>
       </div>
-      <div className="flex gap-3 items-center my-3">
-        <div className="w-1/2 h-[200px]">
-          <img
-            src={artworkUrl ? artworkUrl : "../Empty_Artwork.png"}
-            alt="Post Image"
-            className="object-cover w-full h-full"
-          />
-        </div>
-        <div className="w-1/2 flex flex-col items-center mb-3">
-          <p className="text-xl font-bold mb-3">{song}</p>
-          <div className="flex items-center mb-3">
-            <p className="text-sm font-semibold mb-2">Spotify Details</p>
-            <img src="/Spotify_Icon.png" className="ml-2 mb-1 w-6 h-6"></img>
+        <div className="flex gap-3 items-center my-3">
+          <div className="w-1/2 h-[200px]">
+            <Link href={`spotify:track:${song_id}`}>
+            <img
+              src={artworkUrl ? artworkUrl : "../Empty_Artwork.png"}
+              alt="Post Image"
+              className="object-cover w-full h-full"
+            />
+            </Link>
           </div>
-          <ul className="list-disc pl-5">
-            <li>Artist: {artist}</li>
-            {genre &&
-              <li>Genre: {genre}</li>}
-            <li>Album: {album}</li>
-            <li>Popularity: Top {popularity}%</li>
-          </ul>
+          <div className="w-1/2 flex flex-col items-center mb-3">
+            <Link href={`spotify:track:${song_id}`}>
+              <p className="text-xl font-bold mb-3">{song}</p>
+            </Link>
+            <div className="flex items-center mb-3">
+              <p className="text-sm font-semibold mb-2">Spotify Details</p>
+              <img src="/Spotify_Icon.png" className="ml-2 mb-1 w-6 h-6"></img>
+            </div>
+            <ul className="list-disc pl-5">
+              <Link href={`spotify:artist:${artist_id}`}>
+                <li>Artist: {artist}</li>
+              </Link>
+              {genre && <li>Genre: {genre}</li>}
+              <Link href={`spotify:album:${album_id}`}>
+                <li>Album: {album}</li>
+              </Link>
+              <li>Popularity: Top {popularity}%</li>
+            </ul>
+          </div>
         </div>
-      </div>
       <div className="mt-5 flex gap-8">
         <button onClick={toggleLike} className={"flex gap-2 items-center"} >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={"w-6 h-6 " + (isLikedByMe ? 'fill-red-500' : '')} >
@@ -192,7 +201,7 @@ export default function PostCard({id, song, artist, genre, album, popularity, de
           <Avatar url={comment.profiles.avatar} />
           <div className="bg-green-100 py-2 px-4 rounded-3xl flex-grow relative">
             <div className="flex items-center gap-2">
-              <Link href={'profile/' + comment.profiles.id}>
+              <Link href={pathname.includes('/profile/') ? comment.profiles.id : '/profile/' + comment.profiles.id}>
                 <span className="hover:underline font-semibold ml-1">
                   {comment.profiles.username}<br />
                 </span>
@@ -211,7 +220,6 @@ export default function PostCard({id, song, artist, genre, album, popularity, de
             </div>
           </div>
         </div>
-        
         ))}
       </div>
     </Card>

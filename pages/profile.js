@@ -23,8 +23,7 @@ export default function ProfilePage() {
     const [editMode, setEditMode] = useState(false);
     const [name, setName] = useState("");
     const [username, setUsername] = useState("");
-    const [isPending, setIsPending] = useState(false);
-    const [isFriend, setIsFriend] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
 
     const isMyUser = userId === session?.user?.id;
 
@@ -38,7 +37,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
       if (profile) {
-        fetchFriend();
+        fetchFollow();
       }
     }, [profile]);
       
@@ -71,73 +70,41 @@ export default function ProfilePage() {
       });
     }
 
-    useEffect(() => {
-    }, [isFriend]);
-
-    function fetchFriend() {
-      supabase.from("friends")
+    function fetchFollow() {
+      supabase.from("followers")
         .select()
-        .eq('id', session?.user?.id)
+        .eq('user_id', session?.user?.id)
         .eq('following', profile?.id)
         .then(result => {
           if (result?.data?.length > 0) {
-            setIsFriend(result.data[0].is_friend); // Set isFriend based on friend status
-            setIsPending(result.data[0].is_pending); // Set isPending based on pending status
-          } else {
-            setIsFriend(false);
-            setIsPending(false); // Reset isFriend and isPending if no friend data is found
+            setIsFollowing(true);
           }
         });
     }
-    
 
-    function addFriend() {
-      supabase.from("friends")
-        .update({is_friend: true})
-        .eq('id', profile?.id)
-        .eq('following', session?.user?.id)
+    function addFollow() {
+      if (!isFollowing) {
+      supabase.from("followers")
+        .insert({
+          user_id: session.user.id,
+          following: profile.id,
+        })
         .then(() => {
-          supabase.from("friends")
-            .insert({
-              id: session.user.id,
-              following: profile.id,
-              is_friend: true
-            })
-            .then((result) => {
-              console.log(result);
-              fetchFriend();
-              setIsPending(true);
-            });
+          setIsFollowing(true);
         });
+      }
     }
     
 
-    function removeFriend() {
-      supabase.from("friends")
+    function removeFollow() {
+      supabase.from("followers")
         .delete()
-        .eq('id', session?.user?.id)
+        .eq('user_id', session?.user?.id)
         .eq('following', profile?.id)
         .then(() => {
-          setIsFriend(false);
-          setIsPending(false);
+          setIsFollowing(false);
         })
-
-      supabase.from("friends")
-        .update({is_friend:false})
-        .eq('id', profile?.id)
-        .eq('following', session?.user?.id)
-        .then(() => {})
     }
-
-    useEffect(() => {
-        supabase
-          .from("posts")
-          .select('id, song, description, created_at, profiles(id, avatar, username)')
-          .order('created_at', {ascending: false})
-          .then(result => {
-            setPosts(result.data);
-          })
-    }, []);
 
     if (!session) {
         return <LoginPage />
@@ -188,34 +155,23 @@ export default function ProfilePage() {
                 </div>
                 <div className="grow">
                   <div className="text-right">
-                  {!isMyUser && isPending && !isFriend && (
+                  {!isMyUser && isFollowing && (
                     <button onClick={() => {
-                        removeFriend();
+                        removeFollow();
                     }}
                         className="bg-white rounded-md shadow-sm shadow-gray-500 py-1 px-2 inline-flex mx-1 gap-1">
-                      Pending
+                      Unfollow
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                       </svg>
                     </button>
                   )}
-                  {!isMyUser && isFriend && (
+                  {!isMyUser && !isFollowing && (
                     <button onClick={() => {
-                        removeFriend();
+                        addFollow();
                     }}
                         className="bg-white rounded-md shadow-sm shadow-gray-500 py-1 px-2 inline-flex mx-1 gap-1">
-                      Remove Friend
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                      </svg>
-                    </button>
-                  )}
-                  {!isMyUser && !isFriend && !isPending && (
-                    <button onClick={() => {
-                        addFriend();
-                    }}
-                        className="bg-white rounded-md shadow-sm shadow-gray-500 py-1 px-2 inline-flex mx-1 gap-1">
-                      Add Friend
+                      Follow
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                       </svg>
