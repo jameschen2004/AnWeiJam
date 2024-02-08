@@ -35,10 +35,13 @@ export default function App({ Component, pageProps }) {
 
   return (
     <SessionContextProvider
+    
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Component {...pageProps} />
+      <div className="text-black">
+        <Component {...pageProps} />
+      </div>
     </SessionContextProvider>
   );
 }
