@@ -48,7 +48,7 @@ export default function LoginPage() {
             <h3 className="">If you do not have an account, you may use these login credentials:</h3>
             <ul>
               <li className="mt-1">Email: t65007913@gmail.com</li>
-              <li>Password: V@M2cBk7fZMHp7P</li>
+              <li>Password: $FKbgu5h@HppxT5</li>
             </ul>
           </div>
         </div>
