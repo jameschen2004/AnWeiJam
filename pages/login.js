@@ -47,7 +47,7 @@ export default function LoginPage() {
           <div className="text-gray-500 mt-10 text-center"> {/* Add margin-top here */}
             <h3 className="">If you do not have an account, you may use these login credentials:</h3>
             <ul>
-              <li className="mt-1">Email: t65007913@gmail.com</li>
+              <li className="mt-1">Email: t6134816@gmail.com</li>
               <li>Password: $FKbgu5h@HppxT5</li>
             </ul>
           </div>
