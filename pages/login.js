@@ -26,7 +26,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'spotify',
       options: {
-        scopes: 'user-top-read', 
+        
       },
     });
   };
