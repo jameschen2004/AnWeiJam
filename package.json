@@ -14,7 +14,7 @@
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.39.3",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "javascript-time-ago": "^2.5.9",
     "next": "^14.2.21",
     "node": "^21.6.1",
